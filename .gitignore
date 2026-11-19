@@ -1,0 +1,9 @@
+# File biên dịch
+bin/
+*.class
+
+# Dữ liệu cá nhân (app tự tạo dữ liệu mẫu khi chưa có file)
+data/*.csv
+
+# README của phiên bản cũ trước khi rút gọn
+README.cu.md

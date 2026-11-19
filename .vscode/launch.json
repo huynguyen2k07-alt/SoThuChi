@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Chạy Sổ Thu Chi",
+            "request": "launch",
+            "mainClass": "sothuchi.Main",
+            "cwd": "${workspaceFolder}",
+            "vmArgs": "-Dfile.encoding=UTF-8"
+        }
+    ]
+}
