@@ -14,8 +14,6 @@ public final class DinhDang {
     // STRICT: chặn ngày không có thật như 31/02
     private static final DateTimeFormatter NGAY_NHAP =
             DateTimeFormatter.ofPattern("d/M/uuuu").withResolverStyle(ResolverStyle.STRICT);
-    private static final DateTimeFormatter THANG_NHAP =
-            DateTimeFormatter.ofPattern("M/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     private DinhDang() {
     }
@@ -53,15 +51,6 @@ public final class DinhDang {
             return LocalDate.parse(chu.trim(), NGAY_NHAP);
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("Ngày phải có dạng ngày/tháng/năm, ví dụ 18/11/2026");
-        }
-    }
-
-    // "11/2026" -> YearMonth
-    public static YearMonth docThang(String chu) {
-        try {
-            return YearMonth.parse(chu.trim(), THANG_NHAP);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Tháng phải có dạng tháng/năm, ví dụ 11/2026");
         }
     }
 }

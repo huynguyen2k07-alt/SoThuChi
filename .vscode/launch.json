@@ -7,8 +7,7 @@
             "request": "launch",
             "mainClass": "sothuchi.Main",
             "cwd": "${workspaceFolder}",
-            "vmArgs": "-Dfile.encoding=UTF-8",
-            "console": "integratedTerminal"
+            "vmArgs": "-Dfile.encoding=UTF-8"
         }
     ]
 }
