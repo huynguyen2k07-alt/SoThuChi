@@ -1,30 +1,37 @@
-# Sổ Thu Chi Cá Nhân (Java Swing)
+# Sổ Thu Chi Cá Nhân (Java, chạy trên terminal)
 
-App ghi thu/chi, tự tính số dư, lọc theo tháng và vẽ biểu đồ chi tiêu theo danh mục.
+App ghi thu/chi, tự tính số dư, xem theo tháng và thống kê chi tiêu theo danh mục.
+Không có giao diện cửa sổ: mọi thao tác là gõ số chọn trong menu.
 
 ## Chức năng
 
-- Thêm / sửa / xóa giao dịch (bấm 1 dòng trong bảng để sửa)
-- **Chia theo tháng:** mở app là xem ngay tháng hiện tại; nút ◀ ▶ để chuyển tháng; hết tháng app tự sang tháng mới (bắt đầu từ 0 đ)
-- 3 thẻ: Tổng thu, Tổng chi, Số dư của tháng đang xem
-- Tab **Theo tháng**: mỗi tháng 1 dòng (thu, chi, thu − chi, số dư cuối tháng cộng dồn từ các tháng trước); bấm 1 tháng để xem chi tiết
-- Tìm kiếm, lọc theo loại
-- Tab Thống kê: biểu đồ chi theo danh mục
-- Tự lưu vào `data/sothuchi.csv` sau mỗi thao tác (chưa có file thì tạo dữ liệu mẫu)
+```
+===== SỔ THU CHI - Tháng 11/2026 =====
+1. Xem giao dịch trong tháng      (kèm tổng thu, tổng chi, số dư)
+2. Thêm khoản thu
+3. Thêm khoản chi
+4. Sửa giao dịch                  (Enter để giữ nguyên giá trị cũ)
+5. Xóa giao dịch                  (hỏi lại trước khi xóa)
+6. Tìm kiếm                       (theo mô tả hoặc danh mục)
+7. Thống kê chi theo danh mục     (biểu đồ cột bằng dấu #)
+8. Tổng kết theo tháng            (số dư cuối tháng cộng dồn tháng trước)
+9. Đổi tháng đang xem
+0. Thoát
+```
 
-![Màn hình chính](anh/man-hinh-chinh.png)
-![Theo tháng](anh/theo-thang.png)
-![Thống kê](anh/thong-ke.png)
+- Mở app là xem tháng hiện tại.
+- Tự lưu vào `data/sothuchi.csv` sau mỗi lần thêm/sửa/xóa (chưa có file thì tạo dữ liệu mẫu).
+- Nhập sai (số tiền có chữ, ngày 31/02, tháng 13…) thì báo lỗi rồi quay lại menu.
 
 ## Chạy
 
-Cần JDK 8+. Chạy `./run.sh` (Linux/macOS), `run.bat` (Windows), hoặc mở `src/sothuchi/Main.java` trong VS Code và nhấn F5.
+Cần JDK 11+. Chạy `./run.sh` (Linux/macOS), `run.bat` (Windows), hoặc mở `src/sothuchi/Main.java` trong VS Code và nhấn F5.
 
-## Cấu trúc (10 file)
+## Cấu trúc (9 file)
 
 ```
 src/sothuchi/
-├── Main.java               Mở app: đọc file dữ liệu rồi hiện cửa sổ
+├── Main.java               Mở app: đọc file dữ liệu rồi chạy menu
 ├── model/                  DỮ LIỆU
 │   ├── GiaoDich.java       Lớp trừu tượng (abstract)
 │   ├── KhoanThu.java       extends GiaoDich, tinhAnhHuong() = +soTien
@@ -35,20 +42,18 @@ src/sothuchi/
 ├── service/
 │   └── QuanLyThuChi.java   Nghiệp vụ: thêm/sửa/xóa, lọc, tính tổng, thống kê
 ├── util/
-│   └── DinhDang.java       Định dạng tiền, đọc ngày
-└── view/                   GIAO DIỆN
-    ├── ManHinhChinh.java   Cửa sổ chính (JFrame)
-    └── BieuDoPanel.java    Biểu đồ tự vẽ (override paintComponent)
+│   └── DinhDang.java       Định dạng tiền, đọc ngày/tháng
+└── view/
+    └── MenuConsole.java    Menu trên terminal (Scanner)
 ```
 
 Luồng: `view` → `service` → `model` + `data`.
 
 ## Gợi ý thứ tự thuyết trình
 
-1. **Chạy app** cho xem: thêm 1 khoản chi, bấm dòng để sửa, xóa, lọc tháng, mở tab Thống kê.
+1. **Chạy app** cho xem: chọn 1 (xem tháng), 3 (thêm khoản chi), 4 (sửa), 5 (xóa), 7 (thống kê), 8 (tổng kết theo tháng).
 2. **`GiaoDich`** – lớp trừu tượng: thuộc tính `private` + getter (đóng gói), kiểm tra dữ liệu trong constructor, 2 hàm `abstract`.
 3. **`KhoanThu` / `KhoanChi`** – kế thừa (`extends`, `super(...)`), mỗi lớp viết lại `tinhAnhHuong()` theo cách riêng.
-4. **`QuanLyThuChi.soDu()`** – đa hình: cộng `tinhAnhHuong()` của mọi giao dịch, không cần if/else Thu hay Chi. `soDuDenHetThang()` dùng cùng cách để tính số dư chuyển sang tháng sau; `cacThang()` luôn có tháng hiện tại nên sang tháng mới là tự có tháng mới.
+4. **`QuanLyThuChi.soDu()`** – đa hình: cộng `tinhAnhHuong()` của mọi giao dịch, không cần if/else Thu hay Chi. `soDuDenHetThang()` dùng cùng cách để tính số dư chuyển sang tháng sau.
 5. **`LuuTru` / `FileLuuTru`** – interface: service chỉ biết `LuuTru`, muốn đổi sang database chỉ cần viết lớp mới.
-6. **`ManHinhChinh`** – đọc theo 4 phần có tiêu đề: dựng giao diện → gắn sự kiện → thêm/sửa/xóa → cập nhật hiển thị.
-7. **`BieuDoPanel`** – kế thừa `JPanel`, ghi đè `paintComponent` để tự vẽ cột bằng `Graphics2D`.
+6. **`MenuConsole`** – đọc theo 4 phần có tiêu đề: vòng lặp menu → xem → thêm/sửa/xóa → hàm phụ đọc dữ liệu nhập. Lỗi nhập sai được bắt bằng `try/catch IllegalArgumentException`.
