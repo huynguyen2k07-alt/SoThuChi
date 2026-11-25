@@ -2,41 +2,36 @@ package sothuchi.model;
 
 import java.time.LocalDate;
 
-// Lớp trừu tượng (abstract): phần chung của mọi giao dịch.
-// Không tạo trực tiếp được, chỉ tạo lớp con KhoanThu hoặc KhoanChi.
+// Lớp abstract cho 1 giao dịch. Lớp con: KhoanThu, KhoanChi.
 public abstract class GiaoDich {
 
-    // Đóng gói: thuộc tính private, bên ngoài chỉ đọc qua getter
-    private final int id;
-    private final LocalDate ngay;
-    private final long soTien;      // VNĐ nên dùng số nguyên
-    private final String danhMuc;
-    private final String moTa;
+    private int id;
+    private LocalDate ngay;
+    private long soTien;     // tính bằng VNĐ nên dùng số nguyên long
+    private String danhMuc;
+    private String moTa;
 
     public GiaoDich(int id, LocalDate ngay, long soTien, String danhMuc, String moTa) {
-        // Kiểm tra dữ liệu ngay khi tạo đối tượng
-        if (ngay == null) {
-            throw new IllegalArgumentException("Ngày không được để trống.");
-        }
-        if (soTien <= 0) {
-            throw new IllegalArgumentException("Số tiền phải lớn hơn 0.");
-        }
-        if (danhMuc == null || danhMuc.trim().isEmpty()) {
-            throw new IllegalArgumentException("Hãy chọn danh mục.");
-        }
         this.id = id;
-        this.ngay = ngay;
-        this.soTien = soTien;
-        this.danhMuc = danhMuc.trim();
-        this.moTa = (moTa == null) ? "" : moTa.trim();
+        setNgay(ngay);
+        setSoTien(soTien);
+        setDanhMuc(danhMuc);
+        setMoTa(moTa);
     }
 
-    // Lớp con bắt buộc viết lại 2 hàm này (đa hình)
-    public abstract String getLoai();       // "Thu" hoặc "Chi"
-    public abstract long tinhAnhHuong();    // thu: +soTien, chi: -soTien
+    // --- Lớp con tự viết lại ---
 
-    // Tạo đúng lớp con theo loại ("Thu" -> KhoanThu, "Chi" -> KhoanChi)
-    public static GiaoDich tao(String loai, int id, LocalDate ngay, long soTien, String danhMuc, String moTa) {
+    /** Trả về "Thu" hoặc "Chi". */
+    public abstract String getLoai();
+
+    /** +soTien nếu là thu, -soTien nếu là chi. */
+    public abstract long tinhAnhHuong();
+
+    // --- Tạo đối tượng ---
+
+    /** Tạo KhoanThu hoặc KhoanChi theo loại. */
+    public static GiaoDich tao(String loai, int id, LocalDate ngay, long soTien,
+                               String danhMuc, String moTa) {
         if (KhoanThu.LOAI.equals(loai)) {
             return new KhoanThu(id, ngay, soTien, danhMuc, moTa);
         }
@@ -46,9 +41,55 @@ public abstract class GiaoDich {
         throw new IllegalArgumentException("Loại giao dịch không hợp lệ: " + loai);
     }
 
-    public int getId() { return id; }
-    public LocalDate getNgay() { return ngay; }
-    public long getSoTien() { return soTien; }
-    public String getDanhMuc() { return danhMuc; }
-    public String getMoTa() { return moTa; }
+    // --- Getter / Setter ---
+
+    public int getId() {
+        return id;
+    }
+
+    public LocalDate getNgay() {
+        return ngay;
+    }
+
+    public void setNgay(LocalDate ngay) {
+        if (ngay == null) {
+            throw new IllegalArgumentException("Ngày không được để trống.");
+        }
+        this.ngay = ngay;
+    }
+
+    public long getSoTien() {
+        return soTien;
+    }
+
+    public void setSoTien(long soTien) {
+        if (soTien <= 0) {
+            throw new IllegalArgumentException("Số tiền phải lớn hơn 0.");
+        }
+        this.soTien = soTien;
+    }
+
+    public String getDanhMuc() {
+        return danhMuc;
+    }
+
+    public void setDanhMuc(String danhMuc) {
+        if (danhMuc == null || danhMuc.trim().isEmpty()) {
+            throw new IllegalArgumentException("Hãy chọn danh mục.");
+        }
+        this.danhMuc = danhMuc.trim();
+    }
+
+    public String getMoTa() {
+        return moTa;
+    }
+
+    public void setMoTa(String moTa) {
+        this.moTa = (moTa == null) ? "" : moTa.trim();
+    }
+
+    @Override
+    public String toString() {
+        return getLoai() + " #" + id + " | " + ngay + " | " + danhMuc + " | " + soTien;
+    }
 }

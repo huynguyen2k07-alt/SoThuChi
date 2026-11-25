@@ -5,27 +5,28 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
-import java.util.Locale;
 
-// Chuyển tiền, ngày, tháng sang chữ để hiển thị và ngược lại.
+// Định dạng và đọc tiền, ngày, tháng. Vd: DinhDang.tien(150000) -> "150.000 đ"
 public final class DinhDang {
 
     private static final DateTimeFormatter NGAY = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    // STRICT: chặn ngày không có thật như 31/02
+    // STRICT: chặn ngày sai như 31/02
     private static final DateTimeFormatter NGAY_NHAP =
             DateTimeFormatter.ofPattern("d/M/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     private DinhDang() {
+        // không cho tạo đối tượng
     }
 
-    // 1500000 -> "1.500.000 đ"
+    /** 1500000 -> "1.500.000 đ" */
     public static String tien(long soTien) {
-        return String.format(Locale.US, "%,d đ", soTien).replace(',', '.');
+        String chuoi = String.format("%,d", Math.abs(soTien)).replace(',', '.');
+        return (soTien < 0 ? "-" : "") + chuoi + " đ";
     }
 
-    // Thêm dấu + cho số dương: "+1.500.000 đ" (dùng trong bảng)
+    /** Tiền có dấu +/- (dùng trong bảng). */
     public static String tienCoDau(long soTien) {
-        return (soTien > 0 ? "+" : "") + tien(soTien);
+        return (soTien >= 0 ? "+" : "") + tien(soTien);
     }
 
     public static String ngay(LocalDate ngay) {
@@ -36,19 +37,24 @@ public final class DinhDang {
         return String.format("Tháng %02d/%d", thang.getMonthValue(), thang.getYear());
     }
 
-    // "50000", "50.000", "50,000 đ" -> 50000
-    public static long docTien(String chu) {
-        String so = chu.replaceAll("[.,\\sđĐ]", "");
-        if (!so.matches("\\d{1,15}")) {
-            throw new IllegalArgumentException("Số tiền phải là số, ví dụ 50000 hoặc 50.000");
+    /** Đọc "50000", "50.000", "50,000 đ". */
+    public static long docTien(String chuoi) {
+        String so = chuoi.replace(".", "").replace(",", "").replace("đ", "")
+                .replace("Đ", "").replace(" ", "").trim();
+        if (so.isEmpty()) {
+            throw new IllegalArgumentException("Hãy nhập số tiền.");
         }
-        return Long.parseLong(so);
+        try {
+            return Long.parseLong(so);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Số tiền chỉ được gồm chữ số, ví dụ 50000 hoặc 50.000");
+        }
     }
 
-    // "18/11/2026" hoặc "5/3/2026" -> LocalDate
-    public static LocalDate docNgay(String chu) {
+    /** Đọc ngày dạng 18/11/2026 hoặc 5/3/2026. */
+    public static LocalDate docNgay(String chuoi) {
         try {
-            return LocalDate.parse(chu.trim(), NGAY_NHAP);
+            return LocalDate.parse(chuoi.trim(), NGAY_NHAP);
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("Ngày phải có dạng ngày/tháng/năm, ví dụ 18/11/2026");
         }

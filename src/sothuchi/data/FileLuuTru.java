@@ -1,5 +1,7 @@
 package sothuchi.data;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -11,53 +13,81 @@ import java.util.List;
 
 import sothuchi.model.GiaoDich;
 
-// Lưu giao dịch vào file CSV. Mỗi dòng: loai;id;ngay;soTien;danhMuc;moTa
+// Lưu/đọc giao dịch bằng file CSV, mỗi dòng: loai;id;ngay;soTien;danhMuc;moTa
 public class FileLuuTru implements LuuTru {
 
-    private final Path file;
+    private static final String PHAN_CACH = ";";
+    private final Path duongDan;
 
     public FileLuuTru(String tenFile) {
-        this.file = Paths.get(tenFile);
+        this.duongDan = Paths.get(tenFile);
     }
 
     public boolean tonTai() {
-        return Files.exists(file);
+        return Files.exists(duongDan);
     }
 
     @Override
     public void luu(List<GiaoDich> danhSach) throws IOException {
-        List<String> cacDong = new ArrayList<>();
-        for (GiaoDich gd : danhSach) {
-            cacDong.add(gd.getLoai() + ";" + gd.getId() + ";" + gd.getNgay() + ";" + gd.getSoTien()
-                    + ";" + lamSach(gd.getDanhMuc()) + ";" + lamSach(gd.getMoTa()));
+        // Tạo thư mục nếu chưa có
+        Path thuMuc = duongDan.toAbsolutePath().getParent();
+        if (thuMuc != null) {
+            Files.createDirectories(thuMuc);
         }
-        Files.createDirectories(file.toAbsolutePath().getParent());   // tạo thư mục data/ nếu chưa có
-        Files.write(file, cacDong, StandardCharsets.UTF_8);
+
+        try (BufferedWriter ghi = Files.newBufferedWriter(duongDan, StandardCharsets.UTF_8)) {
+            for (GiaoDich gd : danhSach) {
+                String dong = gd.getLoai() + PHAN_CACH
+                        + gd.getId() + PHAN_CACH
+                        + gd.getNgay() + PHAN_CACH
+                        + gd.getSoTien() + PHAN_CACH
+                        + lamSach(gd.getDanhMuc()) + PHAN_CACH
+                        + lamSach(gd.getMoTa());
+                ghi.write(dong);
+                ghi.newLine();
+            }
+        }
     }
 
     @Override
     public List<GiaoDich> doc() throws IOException {
-        List<GiaoDich> danhSach = new ArrayList<>();
+        List<GiaoDich> ketQua = new ArrayList<>();
         if (!tonTai()) {
-            return danhSach;
+            return ketQua;   // chưa có file thì trả về danh sách rỗng
         }
-        for (String dong : Files.readAllLines(file, StandardCharsets.UTF_8)) {
-            String[] cot = dong.split(";", -1);
-            if (cot.length < 6) {
-                continue;               // bỏ qua dòng trống hoặc thiếu cột
-            }
-            try {
-                danhSach.add(GiaoDich.tao(cot[0], Integer.parseInt(cot[1]), LocalDate.parse(cot[2]),
-                        Long.parseLong(cot[3]), cot[4], cot[5]));
-            } catch (RuntimeException e) {
-                System.err.println("Bỏ qua dòng lỗi: " + dong);
+
+        try (BufferedReader doc = Files.newBufferedReader(duongDan, StandardCharsets.UTF_8)) {
+            String dong;
+            int soDong = 0;
+            while ((dong = doc.readLine()) != null) {
+                soDong++;
+                if (dong.trim().isEmpty()) {
+                    continue;
+                }
+                String[] cot = dong.split(PHAN_CACH, -1);
+                if (cot.length < 6) {
+                    System.err.println("Bỏ qua dòng " + soDong + " vì thiếu cột: " + dong);
+                    continue;
+                }
+                try {
+                    GiaoDich gd = GiaoDich.tao(
+                            cot[0],
+                            Integer.parseInt(cot[1]),
+                            LocalDate.parse(cot[2]),
+                            Long.parseLong(cot[3]),
+                            cot[4],
+                            cot[5]);
+                    ketQua.add(gd);
+                } catch (RuntimeException e) {
+                    System.err.println("Bỏ qua dòng " + soDong + " bị lỗi: " + e.getMessage());
+                }
             }
         }
-        return danhSach;
+        return ketQua;
     }
 
-    // Đổi dấu ";" và xuống dòng trong chữ người dùng nhập để không làm hỏng file
-    private String lamSach(String chu) {
-        return chu.replace(";", ",").replace("\n", " ").replace("\r", " ");
+    /** Bỏ ";" và xuống dòng để không hỏng file. */
+    private String lamSach(String s) {
+        return s.replace(PHAN_CACH, ",").replace("\n", " ").replace("\r", " ");
     }
 }

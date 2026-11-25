@@ -5,8 +5,8 @@ import java.util.List;
 
 import sothuchi.model.GiaoDich;
 
-// Interface: chỉ quy định "lưu được" và "đọc được", không quan tâm lưu ở đâu.
-// Muốn đổi sang database thì viết lớp mới implements LuuTru, không phải sửa chỗ khác.
+// Interface lưu trữ: chỉ quy định luu() và doc().
+// Muốn đổi sang database thì viết lớp mới implements LuuTru.
 public interface LuuTru {
 
     void luu(List<GiaoDich> danhSach) throws IOException;
