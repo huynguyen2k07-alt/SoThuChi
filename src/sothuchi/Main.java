@@ -2,6 +2,7 @@ package sothuchi;
 
 import java.awt.Font;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -19,7 +20,29 @@ import sothuchi.view.thanhphan.BangMau;
 // Điểm bắt đầu: đọc dữ liệu rồi mở cửa sổ chính.
 public class Main {
 
-    private static final String FILE_DU_LIEU = "data/sothuchi.csv";
+    /**
+     * Chọn nơi lưu file dữ liệu:
+     * - Chạy từ mã nguồn (run.sh, VS Code): dùng data/sothuchi.csv trong thư mục dự án.
+     * - Chạy bản đã đóng gói (file .jar / app cài đặt): lưu vào thư mục người dùng
+     *   ~/.sothuchi/sothuchi.csv, vì thư mục cài app thường không được phép ghi.
+     */
+    private static String duongDanDuLieu() {
+        String tuyChon = System.getProperty("sothuchi.data");
+        if (tuyChon != null && !tuyChon.isEmpty()) {
+            return tuyChon;
+        }
+        boolean chayTuJar = false;
+        try {
+            String noiChay = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            chayTuJar = noiChay.endsWith(".jar");
+        } catch (RuntimeException e) {
+            // không xác định được thì coi như chạy từ mã nguồn
+        }
+        if (!chayTuJar) {
+            return "data/sothuchi.csv";
+        }
+        return Paths.get(System.getProperty("user.home"), ".sothuchi", "sothuchi.csv").toString();
+    }
 
     public static void main(String[] args) {
         // Làm mịn chữ (đặt trước khi tạo giao diện)
@@ -30,7 +53,7 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             caiDatGiaoDien();
 
-            FileLuuTru luuTru = new FileLuuTru(FILE_DU_LIEU);
+            FileLuuTru luuTru = new FileLuuTru(duongDanDuLieu());
             QuanLyThuChi quanLy = new QuanLyThuChi(luuTru);
 
             try {

@@ -27,6 +27,26 @@ Cần **JDK 8 trở lên** (khuyên dùng JDK 17 hoặc 21).
 
 Muốn quay về dữ liệu mẫu ban đầu thì xóa file `data/sothuchi.csv` rồi chạy lại.
 
+## Tải về và cài như app trên máy
+
+Vào mục **Releases** của repo này trên GitHub và tải một trong các file:
+
+| File | Dùng cho | Cách mở |
+|---|---|---|
+| `sothuchi_1.0.0_amd64.deb` | Ubuntu / Debian | Bấm đúp để cài, hoặc `sudo apt install ./sothuchi_1.0.0_amd64.deb`. Sau đó tìm **SoThuChi** trong menu ứng dụng. Gói đã có sẵn Java bên trong. |
+| `SoThuChi.jar` | Mọi hệ điều hành có Java 11+ | Bấm đúp, hoặc `java -jar SoThuChi.jar` |
+
+Khi chạy bản đã đóng gói, dữ liệu được lưu ở `~/.sothuchi/sothuchi.csv` trong thư mục người dùng (thư mục cài app thường không cho ghi). Khi chạy từ mã nguồn thì vẫn dùng `data/sothuchi.csv` như cũ.
+
+### Tự đóng gói
+
+Cần JDK 17 trở lên (có lệnh `jpackage`).
+
+- **Linux:** `./dong-goi.sh` → tạo `dist/SoThuChi.jar`, `dist/sothuchi_1.0.0_amd64.deb` và thư mục app chạy ngay `dist/SoThuChi/bin/SoThuChi`.
+- **Windows:** bấm đúp `dong-goi.bat` → tạo `dist\SoThuChi.jar` và `dist\SoThuChi\SoThuChi.exe` (đã kèm Java). Muốn có bộ cài `.exe` thì cài thêm [WiX Toolset](https://wixtoolset.org/).
+
+`jpackage` chỉ tạo được gói cho hệ điều hành đang chạy: muốn có bản Windows thì phải chạy `dong-goi.bat` trên máy Windows.
+
 ## Cấu trúc thư mục
 
 ```

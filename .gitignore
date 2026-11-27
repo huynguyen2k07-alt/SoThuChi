@@ -7,3 +7,7 @@ data/*.csv
 
 # README của phiên bản cũ trước khi rút gọn
 README.cu.md
+
+# File đóng gói (tạo bằng dong-goi.sh / dong-goi.bat)
+build/
+dist/
